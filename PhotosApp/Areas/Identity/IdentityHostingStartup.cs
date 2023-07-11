@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PhotosApp.Areas.Identity.Data;
 using PhotosApp.Services;
+using PhotosApp.Services.TicketStores;
 
 [assembly: HostingStartup(typeof(PhotosApp.Areas.Identity.IdentityHostingStartup))]
 namespace PhotosApp.Areas.Identity
@@ -20,11 +21,18 @@ namespace PhotosApp.Areas.Identity
                 services.AddDbContext<UsersDbContext>(options =>
                     options.UseSqlite(
                         context.Configuration.GetConnectionString("UsersDbContextConnection")));
+                
+                
+                services.AddDbContext<TicketsDbContext>(options =>
+                    options.UseSqlite(
+                        context.Configuration.GetConnectionString("TicketsDbContextConnection")));
+                
 
                 services.AddDefaultIdentity<PhotosAppUser>()
                     .AddPasswordValidator<UsernameAsPasswordValidator<PhotosAppUser>>()
-                    .AddEntityFrameworkStores<UsersDbContext>();
-                
+                    .AddEntityFrameworkStores<UsersDbContext>()
+                    .AddEntityFrameworkStores<TicketsDbContext>();
+
                 services.Configure<IdentityOptions>(options =>
                 {
                     // Default Password settings.
@@ -47,6 +55,8 @@ namespace PhotosApp.Areas.Identity
                 
                 services.ConfigureApplicationCookie(options =>
                 {
+                    var serviceProvider = services.BuildServiceProvider();
+                    options.SessionStore = serviceProvider.GetRequiredService<EntityTicketStore>();
                     options.AccessDeniedPath = "/Identity/Account/AccessDenied";
                     options.Cookie.Name = "PhotosApp.Auth";
                     options.Cookie.HttpOnly = true;
@@ -57,6 +67,8 @@ namespace PhotosApp.Areas.Identity
                     options.ReturnUrlParameter = CookieAuthenticationDefaults.ReturnUrlParameter;
                     options.SlidingExpiration = true;
                 });
+                
+                services.AddTransient<EntityTicketStore>();
             });
         }
     }
