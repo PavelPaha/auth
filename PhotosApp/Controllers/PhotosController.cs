@@ -34,6 +34,7 @@ namespace PhotosApp.Controllers
             return View(model);
         }
 
+        [Authorize(Policy = "MustOwnPhoto")]
         public async Task<IActionResult> GetPhoto(Guid id)
         {
             var photoEntity = await photosRepository.GetPhotoMetaAsync(id);
@@ -46,7 +47,7 @@ namespace PhotosApp.Controllers
             return View(model);
         }
 
-        [Authorize]
+        [Authorize(Policy = "MustOwnPhoto")]
         [HttpGet("photos/{id}")]
         public async Task<IActionResult> GetPhotoFile(Guid id)
         {
@@ -63,9 +64,9 @@ namespace PhotosApp.Controllers
             return View();
         }
 
-        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "CanAddPhoto")]
         public async Task<IActionResult> AddPhoto(AddPhotoModel addPhotoModel)
         {
             if (addPhotoModel == null || !ModelState.IsValid)
@@ -94,7 +95,7 @@ namespace PhotosApp.Controllers
             return RedirectToAction("Index");
         }
         
-        [Authorize]
+        [Authorize(Policy = "MustOwnPhoto")]
         public async Task<IActionResult> EditPhoto(Guid id)
         {
             var photo = await photosRepository.GetPhotoMetaAsync(id);
@@ -108,10 +109,11 @@ namespace PhotosApp.Controllers
             };
             return View(viewModel);
         }
-
-        [Authorize]
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "Beta")]
+        [Authorize(Policy = "MustOwnPhoto")]
         public async Task<IActionResult> EditPhoto(EditPhotoModel editPhotoModel)
         {
             if (editPhotoModel == null || !ModelState.IsValid)
@@ -129,7 +131,7 @@ namespace PhotosApp.Controllers
             return RedirectToAction("Index");
         }
 
-        [Authorize]
+        [Authorize(Policy = "MustOwnPhoto")]
         [HttpPost]
         public async Task<IActionResult> DeletePhoto(Guid id)
         {

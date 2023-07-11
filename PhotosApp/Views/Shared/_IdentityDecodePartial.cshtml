@@ -10,7 +10,7 @@
 @{
     var cookies = Context.Request.Cookies;
     var user = Context.User;
-
+    
     void RenderCookieInfo(string cookieName, params string[] schemes)
     {
         var cookieValue = cookieManager.GetRequestCookie(Context, cookieName);
